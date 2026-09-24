@@ -32,6 +32,8 @@ Checkout dan panel admin tetap memakai koneksi PostgreSQL melalui `pg` di server
 
 Untuk PostgreSQL lokal, buat database `aira_daily_store`, gunakan URL lokal pada `.env`, lalu jalankan langkah migrasi yang sama. `npm run db:setup` tetap tersedia sebagai alias `db:migrate`.
 
+Saat memakai `npm run dev`, indikator **Rendering** berasal dari Next.js dan halaman pertama kali dikompilasi ketika dibuka. Halaman dinamis juga menunggu data Supabase pada tiap navigasi. Indikator tersebut tidak muncul pada server produksi (`npm run build` lalu `npm run start`). Aplikasi menampilkan status memuat selama menunggu; ringkasan admin dan koleksi beranda sudah menggabungkan permintaan data untuk mengurangi waktu tunggu.
+
 Jika URL Direct (`db.<PROJECT_REF>.supabase.co:5432`) menghasilkan `ENOTFOUND` atau `No route to host` pada jaringan IPv4, salin URL **Session pooler** dari menu Connect ke `MIGRATION_DATABASE_URL`. Gunakan URL pooler juga untuk `DATABASE_URL` pada lingkungan tersebut. Host pooler setiap proyek harus disalin dari dashboard, bukan ditebak dari region.
 
 Checkout menyimpan pesanan dengan status `pending` dan mengurangi stok secara atomik. Gambar produk menggunakan URL Unsplash dari starter scraping yang diberikan; koneksi internet diperlukan untuk menampilkannya.
