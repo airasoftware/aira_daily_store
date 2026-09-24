@@ -1,4 +1,4 @@
-const icons = new Set(['home', 'shop', 'search', 'cart', 'cart-add', 'package', 'document', 'edit', 'star', 'truck']);
+const icons = new Set(['home', 'shop', 'search', 'cart', 'cart-add', 'package', 'document', 'edit', 'star', 'truck', 'arrow-right', 'arrow-up-right']);
 
 export function FigmaIcon({ name, className = '' }) {
   if (!icons.has(name)) return null;
