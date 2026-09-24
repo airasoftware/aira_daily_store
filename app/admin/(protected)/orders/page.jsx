@@ -1,0 +1,9 @@
+import { getPool } from '../../../../lib/db';
+import { rupiah } from '../../../../lib/products';
+import { OrderStatus } from '../../../../components/order-status';
+
+export default async function AdminOrders() {
+  const result = await getPool().query(`SELECT o.*, COALESCE(json_agg(json_build_object('name', oi.product_name, 'quantity', oi.quantity, 'price', oi.unit_price)) FILTER (WHERE oi.id IS NOT NULL), '[]') AS items
+    FROM orders o LEFT JOIN order_items oi ON oi.order_id=o.id GROUP BY o.id ORDER BY o.created_at DESC`);
+  return <main className="admin-main"><div className="admin-heading"><div><span className="admin-eyebrow">TRANSAKSI</span><h1>Kelola pesanan<span>.</span></h1><p>{result.rows.length} pesanan tersimpan. Konfirmasi pembayaran atau batalkan pesanan yang belum diproses.</p></div></div>{result.rows.length ? <div className="order-grid">{result.rows.map(order => <article className="order-card" key={order.id}><div className="order-card-head"><div><span className="admin-eyebrow">PESANAN #{order.id}</span><h2>{order.customer_name}</h2><small>{new Date(order.created_at).toLocaleString('id-ID')}</small></div><span className={`status-pill ${order.status}`}>{order.status}</span></div><div className="order-meta"><div><span>Email</span><strong>{order.email}</strong></div><div><span>Telepon</span><strong>{order.phone}</strong></div><div><span>Alamat</span><strong>{order.address}, {order.city} {order.postal_code}</strong></div>{order.notes && <div><span>Catatan</span><strong>{order.notes}</strong></div>}</div><div className="order-items">{order.items.map((item, index) => <div key={index}><span>{item.name} × {item.quantity}</span><strong>{rupiah(item.price * item.quantity)}</strong></div>)}</div><div className="order-total"><span>Subtotal produk</span><strong>{rupiah(order.total)}</strong></div><OrderStatus id={order.id} status={order.status} /></article>)}</div> : <p className="admin-empty">Belum ada pesanan.</p>}</main>;
+}

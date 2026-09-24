@@ -1,0 +1,27 @@
+{
+  "name": "aira-daily-store",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "db:setup": "npm run db:migrate",
+    "db:migrate": "node --env-file=.env scripts/migrate-db.mjs",
+    "db:seed": "node --env-file=.env scripts/seed-products.mjs",
+    "db:check": "node --env-file=.env scripts/check-db.mjs",
+    "db:ping": "node --env-file=.env scripts/ping-db.mjs",
+    "test:catalog": "node --test tests/supabase-catalog.test.mjs",
+    "admin:hash": "node scripts/hash-admin-password.mjs"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.1",
+    "dotenv": "^18.0.3",
+    "next": "16.3.6",
+    "pg": "^8.16.3",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  }
+}
