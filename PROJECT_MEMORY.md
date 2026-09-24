@@ -1,7 +1,7 @@
 # Memori Proyek Aira Daily Store
 
 **Terakhir diperbarui:** 24 September 2026
-**Status:** aplikasi dan panel admin selesai sebagai prototipe; skema dan data contoh sudah ada di proyek Supabase pengguna, tetapi alur aplikasi penuh belum diuji.
+**Status:** aplikasi dan panel admin selesai sebagai prototipe; skema dan data contoh ada di Supabase, beranda serta katalog sudah aktif di Vercel, tetapi checkout dan admin produksi belum diuji penuh.
 **Repo:** `/Users/yukiwicaksono/Devs/aira_daily_store`
 
 ## Ringkasan pekerjaan
@@ -36,6 +36,7 @@
 - Area loading toko sekarang memenuhi tinggi viewport yang tersisa di bawah ticker/header (desktop dan mobile), sehingga footer baru terlihat setelah pengguna scroll. Screenshot saat navigasi ke katalog membuktikan spinner tetap di tengah dan footer tidak tampak di layar awal; build berhasil.
 - Pada 24 September 2026, ikon yang relevan dari file Figma Community “36 Ecommerce icons” diunduh sebagai SVG lokal ke `public/icons/`. Komponen `FigmaIcon` memakai ukuran asli aset dalam bingkai 24 px. Ikon diterapkan pada navigasi toko dan ponsel, pencarian katalog, keranjang serta tombol tambah keranjang, menu admin, dan aksi edit produk. Build berhasil; halaman produk dan daftar produk admin diperiksa secara visual di browser. Aset SVG tambahan (bintang, truk, panah) tersedia untuk kebutuhan tampilan berikutnya.
 - Pada 24 September 2026, fallback env bawaan integrasi Vercel yang sempat ditambahkan dibatalkan atas permintaan pengguna. Aplikasi kembali membaca `DATABASE_URL` untuk runtime, `MIGRATION_DATABASE_URL` untuk migrasi (fallback ke `DATABASE_URL`), dan pasangan `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` untuk katalog. `npm run test:catalog` (3 tes) dan `npm run build` lulus setelah rollback. Variabel tersebut tetap perlu disetel pada environment deployment Vercel yang sesuai.
+- Pada 24 September 2026 pukul 10:20 WIB, deployment Production Vercel `8vUyBLjsWX8GR35kQudyQpjQaYbX` diredeploy dari commit `3c3865e` dengan Project Settings terbaru. Status Ready dan domain `airadaily.store` terpasang. Beranda tampil dengan produk, `/shop` menampilkan 12 produk, dan log runtime khusus deployment baru menunjukkan request 200 tanpa error pada pemeriksaan tersebut. Sebelumnya digest `2572647074` cocok dengan log `DATABASE_URL belum diatur` pada deployment lama. Login admin dan checkout produksi belum diuji.
 
 ## Yang masih perlu dikerjakan
 
