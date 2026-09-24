@@ -30,6 +30,7 @@
 - Pada 23 September 2026, `npm run db:ping -- --migration` berhasil setelah CA Supabase dimuat. `npm run db:migrate` berhasil pada proyek Supabase pengguna. `npm run db:check` menampilkan `products=true`, `orders=true`, `order_items=true` serta koneksi ke database `postgres`; proses pemeriksaan tersebut tidak segera keluar dan dihentikan manual setelah hasil tampil. `npm run db:ping` untuk runtime juga menampilkan koneksi berhasil tetapi tidak segera keluar. Perlu menelusuri penutupan koneksi Session pooler jika berulang.
 - `npm run build` berhasil setelah konfigurasi CA; parser `pg` menunjukkan CA termuat serta verifikasi TLS aktif untuk kedua URL.
 - Pada proyek Supabase pengguna, `npm run db:seed` menambahkan 12 produk, 3 pesanan demo (`pending`, `paid`, `cancelled`), dan 4 item pesanan. Pemeriksaan sesudahnya: 12/3/4 baris, 0 item tanpa relasi, 0 pesanan dengan total salah. Menjalankan `db:seed` ulang menambahkan 0 baris.
+- Pada 24 September 2026, halaman `/admin` di Next.js dev sempat gagal karena `fileURLToPath(new URL(...))` pada `lib/db-config.js` menerima objek URL dari bundler yang tidak cocok. Path sertifikat sekarang ditentukan dari root proses. Halaman admin kembali memuat ringkasan toko; `npm run build` lulus dan parser `pg` tetap memuat CA dengan verifikasi TLS aktif.
 
 ## Yang masih perlu dikerjakan
 
