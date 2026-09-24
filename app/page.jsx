@@ -11,6 +11,8 @@ const categoryCards = [
   { title: 'Baju Dewasa', description: 'Pakaian untuk aktivitas harian.', href: '/shop?category=Baju%20Dewasa', className: 'adults' },
 ];
 
+const promiseItems = ['PILIHAN UNTUK RUMAH', 'PAKAIAN UNTUK KELUARGA', 'BELANJA LEBIH PRAKTIS'];
+
 export default async function Home() {
   const homeProducts = await getProducts({ homepage: true });
   const featured = homeProducts.filter(product => product.is_featured);
@@ -26,11 +28,7 @@ export default async function Home() {
       </div>
       <div className="hero-stamp">RUMAH<br />KELUARGA<br />HARIAN <span><FigmaIcon name="star" /></span></div>
     </section>
-    <div className="promise-bar">
-      <span><FigmaIcon name="star" /> PILIHAN UNTUK RUMAH</span>
-      <span><FigmaIcon name="star" /> PAKAIAN UNTUK KELUARGA</span>
-      <span><FigmaIcon name="star" /> BELANJA LEBIH PRAKTIS</span>
-    </div>
+    <div className="promise-bar"><div className="marquee-track">{[0, 1].map(copy => <div className="marquee-group" aria-hidden={copy === 1 ? 'true' : undefined} key={copy}>{promiseItems.map(item => <span key={item}><FigmaIcon name="star" /> {item}</span>)}</div>)}</div></div>
     <section className="section category-section">
       <div className="section-head"><div><span className="eyebrow">CARI SESUAI KEBUTUHAN</span><h2>Jelajahi kategori<span className="orange-dot">.</span></h2></div><Link href="/shop" className="text-link">Semua produk <FigmaIcon name="arrow-up-right" className="inline-arrow" /></Link></div>
       <div className="category-grid">{categoryCards.map((category, index) => <Link key={category.title} href={category.href} className={`category-card ${category.className}`}><span className="category-number">0{index + 1}</span><div><h3>{category.title}</h3><p>{category.description}</p></div><FigmaIcon name="arrow-right" /></Link>)}</div>

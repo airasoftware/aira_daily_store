@@ -81,6 +81,7 @@
 @media(max-width:640px){.hero{height:auto;min-height:570px;padding:56px 0 70px;background-position:center,65% center;background-image:linear-gradient(90deg,rgba(29,29,22,.84),rgba(29,29,22,.56)),url('/hero-home.jpg')}.hero h1{font-size:clamp(38px,10vw,48px)}.hero-stamp{display:none}.category-grid{grid-template-columns:1fr;gap:10px}.category-card{min-height:155px;padding:18px}.category-card h3{font-size:30px}.category-section{padding-bottom:35px}.featured-section{padding-top:45px}.shop-tools .filter-field{width:100%}.shop-tools .search-box{min-height:48px}}
 .brand-logo{display:block;width:76px;height:76px;object-fit:contain}
 .footer-logo{display:block;width:82px;height:82px;object-fit:contain;margin-bottom:10px}
+.brand-logo,.footer-logo,.admin-brand-logo{filter:drop-shadow(0 7px 11px rgba(36,39,30,.34))}
 @media(max-width:640px){.brand-logo{width:54px;height:54px}.footer-logo{width:76px;height:76px}}
 
 .header-search{position:relative;width:min(220px,22vw)}
@@ -100,3 +101,14 @@
 .search-all{color:var(--earth);font-weight:700;text-align:center;margin-top:2px}
 @media(max-width:640px){.header-search{width:calc(100vw - 150px);max-width:220px}.header-search-form{height:36px}.search-results{right:-32px;top:42px;width:min(360px,calc(100vw - 32px))}.header-actions{gap:10px}.cart-link{flex:none}}
 .checkout-opt-in{display:flex;align-items:flex-start;gap:10px;margin-top:22px;font-size:12px;line-height:1.6;color:#4d594d;cursor:pointer}.checkout-opt-in input{margin:3px 0 0;accent-color:#446b46;flex:none}
+
+.ticker,.promise-bar{overflow:hidden;justify-content:flex-start}
+.promise-bar{padding:0}
+.marquee-track{display:flex;width:max-content;animation:marquee-scroll 44s linear infinite}
+.marquee-group{display:flex;flex:none;align-items:center;justify-content:space-around;gap:48px;min-width:100vw;white-space:nowrap}
+.ticker .marquee-group{height:32px;padding:0 24px}
+.promise-bar .marquee-track{animation-duration:48s}
+.promise-bar .marquee-group{min-height:66px;padding:16px 24px}
+.promise-bar .marquee-group>span{display:inline-flex;align-items:center;gap:5px}
+@keyframes marquee-scroll{to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.ticker,.promise-bar{overflow-x:auto}.marquee-track{animation:none}.marquee-group[aria-hidden="true"]{display:none}}
