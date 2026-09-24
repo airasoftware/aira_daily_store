@@ -123,3 +123,5 @@
 .cart-link.cart-arrival,.mobile-nav a[href="/cart"].cart-arrival{animation:cart-arrival-pop .5s ease-out}
 @keyframes cart-arrival-pop{40%{transform:scale(1.28)}75%{transform:scale(.94)}100%{transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.cart-link.cart-arrival,.mobile-nav a[href="/cart"].cart-arrival{animation:none}}
+.header{position:sticky;top:0;z-index:30}
+@media(max-width:640px){.header{position:relative;top:auto;z-index:10}}
