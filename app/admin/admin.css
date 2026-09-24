@@ -3,3 +3,8 @@ body:has(.admin-root){background:#f5f6f2;padding-bottom:0}body:has(.admin-root)>
 @media(max-width:700px){.admin-frame{display:block}.admin-sidebar{position:static;min-height:0;height:auto;padding:13px 16px}.admin-brand{margin:0 0 17px;font-size:21px}.admin-brand small,.sidebar-caption,.sidebar-bottom{display:none}.admin-sidebar nav{display:flex;gap:7px}.admin-sidebar nav a{font-size:14px;padding:8px 10px}.admin-sidebar nav a span{font-size:11px}.admin-topbar{height:46px;padding:0 16px}.admin-topbar>span{display:none}.admin-main{padding:25px 15px 60px}.admin-heading{align-items:start;flex-direction:column}.admin-heading h1{font-size:36px}.stat-grid{grid-template-columns:1fr}.stat-grid>div{min-height:110px}.admin-login{grid-template-columns:1fr}.login-panel{width:calc(100% - 40px);padding:60px 0}.login-art{display:none}.admin-field-grid,.editor-side{grid-template-columns:1fr}.admin-field-grid .wide{grid-column:1}.product-editor{gap:16px}.editor-card{padding:18px}.order-card{padding:18px}}
 
 .admin-main.loading-screen{min-height:calc(100dvh - 65px);max-width:none}
+
+.admin-sidebar nav a .figma-icon{width:24px;height:24px}
+.admin-sidebar nav a .figma-icon img{filter:invert(1)}
+.table-actions a{display:inline-flex;align-items:center;gap:3px}
+.table-actions .figma-icon{transform:scale(.72);margin:-3px;transform-origin:center}

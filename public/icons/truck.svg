@@ -1,0 +1,12 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="19" height="12.5" viewBox="0 0 19 12.5" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group 10">
+<path id="Vector 29" d="M1.5 2.5H6.5" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector 30" d="M2.5 4.5H6.5" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector 31" d="M3.5 6.5H6.5" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector 32" d="M4.5 8.5H6.5" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Subtract" fill-rule="evenodd" clip-rule="evenodd" d="M13 1.5V9.5C13 9.77614 12.7761 10 12.5 10H8.11805C8.35557 10.2654 8.5 10.6158 8.5 11H12.5C13.3284 11 14 10.3284 14 9.5V1.5C14 0.671573 13.3284 0 12.5 0H0.5C0.223858 0 0 0.223858 0 0.5C0 0.776142 0.223858 1 0.5 1H12.5C12.7761 1 13 1.22386 13 1.5ZM5.5 11C5.5 10.6158 5.64443 10.2654 5.88195 10H4C3.72386 10 3.5 10.2239 3.5 10.5C3.5 10.7761 3.72386 11 4 11H5.5Z" fill="black"/>
+<path id="Subtract_2" fill-rule="evenodd" clip-rule="evenodd" d="M18 7.17675V9.5C18 9.77614 17.7761 10 17.5 10H17.1181C17.3556 10.2654 17.5 10.6158 17.5 11C18.3284 11 19 10.3284 19 9.5V7.17675C18.9999 6.56351 18.626 6.01194 18.0566 5.78418L13.6855 4.03613C13.4292 3.93357 13.1387 4.05806 13.0361 4.31445C12.9336 4.57084 13.0581 4.86131 13.3145 4.96386L17.6855 6.71289C17.8753 6.78878 17.9999 6.97241 18 7.17675ZM14.5 11C14.5 10.6158 14.6444 10.2654 14.8819 10H12.5C12.2239 10 12 10.2239 12 10.5C12 10.7761 12.2239 11 12.5 11H14.5Z" fill="black"/>
+<circle id="Ellipse 11" cx="16" cy="11" r="1" stroke="black"/>
+<circle id="Ellipse 12" cx="7" cy="11" r="1" stroke="black"/>
+</g>
+</svg>

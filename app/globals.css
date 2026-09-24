@@ -12,3 +12,24 @@
 @keyframes loading-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.loading-spinner{animation:none}}
 @media(max-width:640px){.page-shell.loading-screen{min-height:calc(100dvh - 93px)}}
+
+/* Keep each exported Figma SVG at its original dimensions inside the 24px icon frame. */
+.figma-icon{display:inline-block;position:relative;flex:none;width:24px;height:24px;vertical-align:middle}
+.figma-icon img{position:absolute;display:block;max-width:none;width:var(--icon-width);height:var(--icon-height);left:var(--icon-left);top:var(--icon-top)}
+.figma-icon-home{--icon-width:19px;--icon-height:18.5858px;--icon-left:2.5px;--icon-top:2.5px}
+.figma-icon-shop{--icon-width:20.4872px;--icon-height:17px;--icon-left:1.75px;--icon-top:3.5px}
+.figma-icon-search{--icon-width:16.5px;--icon-height:16.5px;--icon-left:4px;--icon-top:4px}
+.figma-icon-cart{--icon-width:16.6409px;--icon-height:17.5667px;--icon-left:3.5px;--icon-top:3.5px}
+.figma-icon-cart-add{--icon-width:17.0001px;--icon-height:18.5667px;--icon-left:3.5px;--icon-top:2.5px}
+.figma-icon-package{--icon-width:17px;--icon-height:17.882px;--icon-left:3.5px;--icon-top:3.5px}
+.figma-icon-document{--icon-width:16px;--icon-height:18px;--icon-left:4px;--icon-top:3px}
+.figma-icon-edit{--icon-width:17.5995px;--icon-height:17.5723px;--icon-left:3.5px;--icon-top:2.5px}
+.figma-icon-star{--icon-width:24px;--icon-height:24px;--icon-left:0;--icon-top:0}
+.figma-icon-truck{--icon-width:19px;--icon-height:12.5px;--icon-left:2px;--icon-top:5.5px}
+.icon-link,.cart-link{display:inline-flex;align-items:center;justify-content:center}
+.card-add{display:flex;align-items:center;justify-content:center;gap:5px}
+.card-add .figma-icon{width:20px;height:20px;transform:scale(.83);transform-origin:center}
+.card-add:hover .figma-icon img,.dark-button .figma-icon img{filter:invert(1)}
+.detail-buy .add-cart-action{gap:10px}
+.mobile-nav .figma-icon{margin-top:0}
+.empty-state>.figma-icon{display:block;margin:0 auto 16px;transform:scale(2)}
