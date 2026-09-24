@@ -15,6 +15,20 @@ Toko perlengkapan outdoor anak dengan Next.js App Router dan PostgreSQL, terinsp
 
 Isi keempat variabel sebelum menjalankan build produksi; Next.js memasukkan nilai `NEXT_PUBLIC_` ke bundle saat build. Setelah mengubah nilai tersebut, jalankan `npm run build` lagi sebelum `npm run start` atau deployment.
 
+### Deployment dengan integrasi Supabase di Vercel
+
+Jika integrasi Supabase sudah memasang environment variables pada proyek Vercel, aplikasi dapat memakai nama bawaannya tanpa menyalin password database ke variabel publik:
+
+| Keperluan | Urutan nama yang dibaca aplikasi |
+| --- | --- |
+| PostgreSQL saat runtime (admin dan checkout) | `DATABASE_URL`, lalu `POSTGRES_URL`, lalu `POSTGRES_PRISMA_URL` |
+| Supabase Data API untuk katalog | Pasangan `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, atau `SUPABASE_URL` + `SUPABASE_PUBLISHABLE_KEY` |
+| Migrasi/seed | `MIGRATION_DATABASE_URL`, lalu `POSTGRES_URL_NON_POOLING`, kemudian URL runtime jika bukan Transaction pooler |
+
+`POSTGRES_PRISMA_URL` dari integrasi dibaca oleh driver `pg` setelah parameter khusus Prisma (`pgbouncer` dan `connection_limit`) dilepas. Pilihan runtime yang disarankan untuk Vercel adalah Transaction pooler Supabase (port 6543). Jika `POSTGRES_URL` tersedia, periksa jenis koneksinya pada dashboard Supabase; `DATABASE_URL` dapat diisi sendiri untuk memilih URL runtime secara eksplisit. Migrasi memerlukan Direct connection atau Session pooler (port 5432), bukan Transaction pooler.
+
+Variabel `SUPABASE_JWT_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, dan `SUPABASE_SECRET_KEY` **tidak dipakai** oleh aplikasi ini. Jangan beri prefix `NEXT_PUBLIC_` pada URL PostgreSQL, password, atau secret key. Tetapkan juga `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, dan `ADMIN_SESSION_SECRET` jika panel admin akan dipakai. Pilih environment **Production** (dan **Preview** bila perlu) pada Vercel, kemudian buat deployment baru setelah mengubah env. File `.env` lokal tidak terkirim otomatis ke Vercel.
+
 Contoh bentuk URL (salin host dan username yang sebenarnya dari dashboard):
 
 ```dotenv
@@ -26,7 +40,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 
 Saat kedua variabel `NEXT_PUBLIC_` terisi, beranda, katalog, dan detail produk membaca tabel `products` melalui Supabase JS/Data API. Migrasi memberi role `anon` dan `authenticated` izin **SELECT produk aktif saja**; tabel pesanan tidak diberi izin Data API. Jika kedua variabel masih kosong, katalog memakai koneksi PostgreSQL server seperti sebelumnya untuk pengembangan lokal. Jika hanya satu variabel terisi, aplikasi menampilkan kesalahan konfigurasi.
 
-Checkout dan panel admin tetap memakai koneksi PostgreSQL melalui `pg` di server Next.js, sehingga **`DATABASE_URL` tetap diperlukan** untuk aplikasi lengkap. Transaksi pengurangan/pengembalian stok dan pembuatan pesanan berlangsung di server. Prefix `NEXT_PUBLIC_` berarti nilainya dapat terlihat di browser: jangan pernah menaruh password database atau secret key di sana. Koneksi `pg` dibatasi satu per instance agar sesuai dengan pooler serverless. Query aplikasi tidak memakai named prepared statements, sehingga kompatibel dengan Transaction pooler.
+Checkout dan panel admin tetap memakai koneksi PostgreSQL melalui `pg` di server Next.js, sehingga **URL PostgreSQL server tetap diperlukan** untuk aplikasi lengkap. Transaksi pengurangan/pengembalian stok dan pembuatan pesanan berlangsung di server. Prefix `NEXT_PUBLIC_` berarti nilainya dapat terlihat di browser: jangan pernah menaruh password database atau secret key di sana. Koneksi `pg` dibatasi satu per instance agar sesuai dengan pooler serverless. Query aplikasi tidak memakai named prepared statements, sehingga kompatibel dengan Transaction pooler.
 
 `db:migrate` aman dijalankan ulang dan tidak mengisi atau menghapus produk. Tabel dibuat dengan RLS aktif; policy hanya mengizinkan baca produk aktif melalui Data API. Akses pesanan tetap melalui server Next.js. Setelah URL dan key Supabase diisi, jalankan migrasi sebelum membuka toko. Jika perlu kembali ke PostgreSQL lokal, kosongkan kedua variabel `NEXT_PUBLIC_`, ganti URL database ke lokal, lalu jalankan `db:migrate` lagi. Data di database Supabase tidak diubah oleh pergantian URL tersebut.
 
