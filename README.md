@@ -38,12 +38,28 @@ Jika URL Direct (`db.<PROJECT_REF>.supabase.co:5432`) menghasilkan `ENOTFOUND` a
 
 Checkout menyimpan pesanan dengan status `pending` dan mengurangi stok secara atomik. Gambar produk menggunakan URL Unsplash dari starter scraping yang diberikan; koneksi internet diperlukan untuk menampilkannya.
 
+### Konfirmasi WhatsApp dan email
+
+Setelah transaksi checkout berhasil, server mengirim konfirmasi email ke alamat yang diisi pelanggan dan konfirmasi WhatsApp **hanya jika pelanggan mencentang persetujuan WhatsApp**. Pilihan ini disimpan pada pesanan. Nomor WhatsApp harus nomor Indonesia (`08...`, `62...`, atau `+62...`). Pesanan tetap tersimpan bila salah satu layanan pesan gagal; halaman sukses menunjukkan status masing-masing kanal. Status `terkirim` berarti penyedia menerima permintaan, bukan bukti pesan telah dibaca atau masuk ke inbox. Jangan tekan “Buat pesanan” lagi untuk mencoba ulang pesan, karena itu akan membuat pesanan baru.
+
+Nomor pesanan yang terlihat pelanggan dan admin berbentuk `ORD-YYYYMMDD-000000`, misalnya `ORD-20260924-000043`. Tanggal mengikuti zona `Asia/Jakarta`, sedangkan bagian terakhir berasal dari ID pesanan unik di database (minimal enam digit). ID asli tetap dipakai untuk relasi dan operasi internal; pesanan lama juga memperoleh nomor tampilan saat dibaca tanpa migrasi data.
+
+- Jalankan `npm run db:migrate`. Kredensial yang disimpan lewat admin dienkripsi dengan kunci yang diturunkan dari `ADMIN_SESSION_SECRET`; pertahankan nilai secret itu saat deploy ulang. Jika secret dirotasi, token dan App Password yang tersimpan harus diisi ulang di admin.
+- Buka **Admin → Pengaturan**. Nomor WhatsApp pengirim awal `6285111412046` dan email pengirim awal `it.airasolutions@gmail.com` dapat diubah di sana. Token dan App Password disimpan terenkripsi di PostgreSQL; form tidak pernah menampilkan nilainya kembali. Kosongkan kolom rahasia saat menyimpan bila tidak ingin menggantinya.
+- **Email:** Aktifkan Verifikasi 2 Langkah pada akun Gmail pengirim, buat [Google App Password](https://support.google.com/accounts/answer/2461835), lalu isi di admin. Aplikasi memakai SMTP Gmail; alamat email dan App Password harus berasal dari akun yang sama. Jangan isi dengan password login Google biasa.
+- Email pesanan memakai subjek `Invoice INV-YYYYMMDD-NOMOR | Pesanan Aira Daily diterima`, ringkasan barang dan alamat dalam isi HTML serta teks biasa, dan lampiran PDF invoice. Invoice menampilkan subtotal produk; ongkir, tagihan akhir, dan cara pembayaran tetap menunggu konfirmasi. PDF bukan bukti pembayaran.
+- Tombol **Kirim pratinjau email & invoice** di halaman pengaturan mengirim satu contoh email berikut PDF bertanda contoh ke alamat pengirim tanpa membuat pesanan. Respons berhasil berarti server SMTP Gmail menerima pesan; periksa kotak masuk atau Spam untuk memastikan pesan tiba.
+- **WhatsApp:** Daftarkan nomor pengirim pada [Meta WhatsApp Business Platform](https://www.postman.com/meta/whatsapp-business-platform/documentation/wlk6lh4/whatsapp-cloud-api). Isi Phone Number ID yang sesuai dengan nomor itu, access token dengan izin `whatsapp_business_messaging`, dan versi Graph API aktif di admin. Mengubah teks nomor tanpa mengubah Phone Number ID ke milik nomor baru tidak akan mengubah nomor pengirim sebenarnya.
+- Buat dan tunggu persetujuan template WhatsApp kategori **utility**, nama `aira_order_received`, bahasa **Indonesian (`id`)**, dengan body: `Halo {{1}}, pesanan Aira Daily {{2}} sudah kami terima. Subtotal produk: {{3}}. Biaya pengiriman dan pembayaran akan kami konfirmasi kemudian. Terima kasih!` Parameter berurutan: nama pelanggan, nomor pesanan (`ORD-...`), subtotal. Template diperlukan untuk menghubungi pelanggan dari checkout. Jika template lama sudah disetujui dengan tanda `#` sebelum `{{2}}`, teks pesan akan menampilkan `#ORD-...`; sesuaikan template di Meta bila ingin tanpa tanda tersebut.
+
+Variabel lama `GMAIL_APP_PASSWORD`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, dan `WHATSAPP_API_VERSION` masih dibaca sebagai fallback sampai nilainya diatur dari admin. Semua rahasia harus tetap di server tanpa prefix `NEXT_PUBLIC_`. WhatsApp Cloud API dapat mengenakan biaya per template; Gmail gratis untuk volume kecil dengan batas pengiriman Google. Uji dengan satu pesanan nyata ke nomor dan email yang dikuasai, lalu periksa kedua pesan serta log jika status gagal. Tanpa konfigurasi, checkout tetap membuat pesanan tetapi kedua status konfirmasi tampil “belum terkirim”.
+
 ## Panel admin
 
 1. Jalankan `npm run admin:hash`, masukkan password admin minimal 12 karakter, lalu salin nilai `ADMIN_PASSWORD_HASH` yang dihasilkan ke `.env`.
 2. Isi `ADMIN_EMAIL` dan `ADMIN_SESSION_SECRET` di `.env`. Gunakan secret acak minimal 32 karakter. Contoh pembuatannya: `openssl rand -hex 32`.
 3. Jalankan ulang server, kemudian buka `/admin/login`.
 
-Admin dapat menambah dan mengedit produk, mengatur stok, memilih produk untuk Best Seller atau New Arrival, serta mengarsipkan produk. Produk yang diarsipkan tersembunyi dari toko tetapi riwayat pesanan tetap tersimpan. Admin dapat menandai pesanan menunggu sebagai dibayar atau membatalkannya. Pembatalan mengembalikan stok; pesanan yang sudah dibayar tidak dapat dibatalkan melalui panel ini.
+Admin dapat menambah dan mengedit produk, mengatur stok, memilih produk untuk Best Seller atau New Arrival, serta mengarsipkan produk. Produk yang diarsipkan tersembunyi dari toko tetapi riwayat pesanan tetap tersimpan. Admin dapat menandai pesanan menunggu sebagai dibayar atau membatalkannya. Pembatalan mengembalikan stok; pesanan yang sudah dibayar tidak dapat dibatalkan melalui panel ini. Halaman **Pengaturan** mengelola pengirim notifikasi checkout.
 
 Belum ada pembayaran online, ongkir otomatis, login pelanggan, atau pengaturan beberapa akun admin.

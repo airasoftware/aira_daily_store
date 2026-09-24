@@ -99,3 +99,4 @@
 .search-status{color:var(--muted);margin:0}
 .search-all{color:var(--earth);font-weight:700;text-align:center;margin-top:2px}
 @media(max-width:640px){.header-search{width:calc(100vw - 150px);max-width:220px}.header-search-form{height:36px}.search-results{right:-32px;top:42px;width:min(360px,calc(100vw - 32px))}.header-actions{gap:10px}.cart-link{flex:none}}
+.checkout-opt-in{display:flex;align-items:flex-start;gap:10px;margin-top:22px;font-size:12px;line-height:1.6;color:#4d594d;cursor:pointer}.checkout-opt-in input{margin:3px 0 0;accent-color:#446b46;flex:none}

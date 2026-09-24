@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS orders (
   customer_name TEXT NOT NULL,
   email TEXT NOT NULL,
   phone TEXT NOT NULL,
+  whatsapp_opt_in BOOLEAN NOT NULL DEFAULT FALSE,
   address TEXT NOT NULL,
   city TEXT NOT NULL,
   postal_code TEXT NOT NULL,
@@ -33,6 +34,8 @@ CREATE TABLE IF NOT EXISTS orders (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS whatsapp_opt_in BOOLEAN NOT NULL DEFAULT FALSE;
+
 CREATE TABLE IF NOT EXISTS order_items (
   id BIGSERIAL PRIMARY KEY,
   order_id BIGINT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -43,11 +46,25 @@ CREATE TABLE IF NOT EXISTS order_items (
   line_total INTEGER NOT NULL CHECK (line_total >= 0)
 );
 
+CREATE TABLE IF NOT EXISTS notification_settings (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  whatsapp_sender TEXT NOT NULL DEFAULT '6285111412046',
+  whatsapp_phone_number_id TEXT NOT NULL DEFAULT '',
+  whatsapp_api_version TEXT NOT NULL DEFAULT '',
+  whatsapp_access_token_ciphertext TEXT NOT NULL DEFAULT '',
+  sender_email TEXT NOT NULL DEFAULT 'it.airasolutions@gmail.com',
+  gmail_app_password_ciphertext TEXT NOT NULL DEFAULT '',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO notification_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+
 -- Toko boleh membaca produk aktif lewat Supabase Data API. Checkout dan admin
 -- tetap memakai koneksi PostgreSQL server, sehingga tabel pesanan tetap privat.
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notification_settings ENABLE ROW LEVEL SECURITY;
 
 -- Role anon/authenticated hanya ada pada proyek Supabase. Lewati blok ini
 -- pada PostgreSQL lokal agar skema tetap dapat diuji tanpa Supabase CLI.
@@ -58,6 +75,7 @@ BEGIN
     GRANT USAGE ON SCHEMA public TO anon, authenticated;
     REVOKE ALL ON TABLE public.products FROM anon, authenticated;
     REVOKE ALL ON TABLE public.orders, public.order_items FROM anon, authenticated;
+    REVOKE ALL ON TABLE public.notification_settings FROM anon, authenticated;
     GRANT SELECT ON TABLE public.products TO anon, authenticated;
     IF NOT EXISTS (
       SELECT 1 FROM pg_policies

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getPool } from '../../../lib/db';
+import { normalizeWhatsAppPhone, sendOrderNotifications } from '../../../lib/order-notifications';
+import { orderNumber } from '../../../lib/order-number';
 
 export const runtime = 'nodejs';
 
@@ -12,13 +14,16 @@ export async function POST(request) {
   const customerName = clean(body.customerName, 120);
   const email = clean(body.email, 254);
   const phone = clean(body.phone, 30);
+  const whatsAppPhone = normalizeWhatsAppPhone(phone);
   const address = clean(body.address, 500);
   const city = clean(body.city, 100);
   const postalCode = clean(body.postalCode, 12);
   const notes = clean(body.notes, 500);
-  if (!customerName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !phone || !address || !city || !postalCode) {
-    return NextResponse.json({ error: 'Lengkapi nama, email, telepon, dan alamat pengiriman.' }, { status: 400 });
+  const whatsappOptIn = body.whatsappOptIn === true;
+  if (!customerName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !address || !city || !postalCode) {
+    return NextResponse.json({ error: 'Lengkapi nama, email, WhatsApp, dan alamat pengiriman.' }, { status: 400 });
   }
+  if (!whatsAppPhone) return NextResponse.json({ error: 'Masukkan nomor WhatsApp Indonesia yang valid, misalnya 081234567890.' }, { status: 400 });
   if (!Array.isArray(body.items) || body.items.length < 1 || body.items.length > 50) {
     return NextResponse.json({ error: 'Keranjang kosong atau terlalu banyak produk.' }, { status: 400 });
   }
@@ -29,6 +34,7 @@ export async function POST(request) {
   }
 
   const client = await getPool().connect();
+  let savedOrder;
   try {
     await client.query('BEGIN');
     const reserved = [];
@@ -41,16 +47,18 @@ export async function POST(request) {
       reserved.push({ ...result.rows[0], quantity: item.quantity });
     }
     const subtotal = reserved.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const order = await client.query(`INSERT INTO orders (customer_name, email, phone, address, city, postal_code, notes, subtotal, total)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$8) RETURNING id, total`, [customerName, email, phone, address, city, postalCode, notes, subtotal]);
+    const order = await client.query(`INSERT INTO orders (customer_name, email, phone, whatsapp_opt_in, address, city, postal_code, notes, subtotal, total)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$9) RETURNING id, total, created_at`, [customerName, email, whatsAppPhone, whatsappOptIn, address, city, postalCode, notes, subtotal]);
     for (const item of reserved) {
       await client.query('INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, line_total) VALUES ($1,$2,$3,$4,$5,$6)', [order.rows[0].id, item.id, item.name, item.quantity, item.price, item.price * item.quantity]);
     }
     await client.query('COMMIT');
-    return NextResponse.json({ orderId: order.rows[0].id, total: order.rows[0].total }, { status: 201 });
+    savedOrder = { id: order.rows[0].id, total: order.rows[0].total, createdAt: order.rows[0].created_at, customerName, email, phone: whatsAppPhone, whatsappOptIn, address, city, postalCode, notes, items: reserved };
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Gagal menyimpan pesanan:', error);
     return NextResponse.json({ error: 'Pesanan belum dapat disimpan. Coba lagi nanti.' }, { status: 500 });
   } finally { client.release(); }
+  const notifications = await sendOrderNotifications(savedOrder);
+  return NextResponse.json({ orderId: savedOrder.id, orderNumber: orderNumber(savedOrder), total: savedOrder.total, notifications }, { status: 201 });
 }

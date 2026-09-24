@@ -3,13 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export function OrderStatus({ id, status }) {
+export function OrderStatus({ id, orderNumber, status }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   if (status !== 'pending') return null;
   async function update(nextStatus) {
-    if (nextStatus === 'cancelled' && !window.confirm(`Batalkan pesanan #${id}? Stok akan dikembalikan.`)) return;
+    if (nextStatus === 'cancelled' && !window.confirm(`Batalkan pesanan ${orderNumber}? Stok akan dikembalikan.`)) return;
     setBusy(true); setError('');
     try {
       const response = await fetch(`/api/admin/orders/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: nextStatus }) });
