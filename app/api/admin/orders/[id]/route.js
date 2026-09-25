@@ -21,7 +21,12 @@ export async function PATCH(request, { params }) {
     if (order.rows[0].status !== 'pending') { await client.query('ROLLBACK'); return NextResponse.json({ error: 'Hanya pesanan menunggu yang dapat diubah.' }, { status: 409 }); }
     await client.query('UPDATE orders SET status=$1 WHERE id=$2', [body.status, id]);
     if (body.status === 'cancelled') {
-      await client.query(`UPDATE products p SET stock = p.stock + oi.quantity FROM order_items oi WHERE oi.order_id=$1 AND oi.product_id=p.id`, [id]);
+      await client.query(`UPDATE product_variants v SET stock = v.stock + oi.quantity FROM order_items oi WHERE oi.order_id=$1 AND oi.variant_id=v.id`, [id]);
+      await client.query(`UPDATE products p SET stock = p.stock + restored.quantity FROM
+        (SELECT product_id, SUM(quantity) AS quantity FROM order_items WHERE order_id=$1 AND variant_id IS NULL GROUP BY product_id) restored
+        WHERE p.id = restored.product_id AND p.has_variants = FALSE`, [id]);
+      await client.query(`UPDATE products p SET stock = COALESCE((SELECT SUM(v.stock) FROM product_variants v WHERE v.product_id=p.id AND v.is_active), 0)
+        WHERE p.has_variants = TRUE AND p.id IN (SELECT product_id FROM order_items WHERE order_id=$1)`, [id]);
     }
     await client.query('COMMIT');
     return NextResponse.json({ ok: true, status: body.status });

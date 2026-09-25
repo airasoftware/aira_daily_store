@@ -62,4 +62,8 @@ Variabel lama `GMAIL_APP_PASSWORD`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS
 
 Admin dapat menambah dan mengedit produk, mengatur stok, memilih produk untuk Best Seller atau New Arrival, serta mengarsipkan produk. Produk yang diarsipkan tersembunyi dari toko tetapi riwayat pesanan tetap tersimpan. Admin dapat menandai pesanan menunggu sebagai dibayar atau membatalkannya. Pembatalan mengembalikan stok; pesanan yang sudah dibayar tidak dapat dibatalkan melalui panel ini. Halaman **Pengaturan** mengelola pengirim notifikasi checkout.
 
+Untuk produk dengan varian, tambahkan pilihan warna dan ukuran di **Master varian** (`/admin/variants`). Di editor produk, aktifkan pilihan varian lalu isi kombinasi warna–ukuran, harga jual, dan stok tiap kombinasi. Katalog menampilkan harga kombinasi termurah dan jumlah stok aktif; pelanggan memilih kombinasi di halaman detail. Harga dan stok selalu diperiksa kembali di server saat checkout. Jalankan `npm run db:migrate` pada database tujuan sebelum menjalankan versi aplikasi ini.
+
+Jika migrasi dilakukan melalui Supabase SQL Editor, gunakan [`db/20260925_product_variants_supabase.sql`](db/20260925_product_variants_supabase.sql). Skrip ini khusus perubahan varian dan aman dijalankan ulang pada skema Aira Daily Store yang sudah memiliki tabel `products` serta `order_items`.
+
 Belum ada pembayaran online, ongkir otomatis, login pelanggan, atau pengaturan beberapa akun admin.

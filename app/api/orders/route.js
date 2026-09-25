@@ -28,8 +28,8 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Keranjang kosong atau terlalu banyak produk.' }, { status: 400 });
   }
   if (body.items.some(item => !item || typeof item !== 'object')) return NextResponse.json({ error: 'Produk tidak valid.' }, { status: 400 });
-  const items = body.items.map(item => ({ id: String(item.productId), quantity: Number(item.quantity) }));
-  if (items.some(item => !/^\d+$/.test(item.id) || !Number.isSafeInteger(item.quantity) || item.quantity < 1 || item.quantity > 99) || new Set(items.map(item => item.id)).size !== items.length) {
+  const items = body.items.map(item => ({ id: String(item.productId), variantId: item.variantId == null ? null : String(item.variantId), quantity: Number(item.quantity) }));
+  if (items.some(item => !/^\d+$/.test(item.id) || (item.variantId !== null && !/^\d+$/.test(item.variantId)) || !Number.isSafeInteger(item.quantity) || item.quantity < 1 || item.quantity > 99) || new Set(items.map(item => `${item.id}:${item.variantId ?? ''}`)).size !== items.length) {
     return NextResponse.json({ error: 'Jumlah atau produk tidak valid.' }, { status: 400 });
   }
 
@@ -38,19 +38,34 @@ export async function POST(request) {
   try {
     await client.query('BEGIN');
     const reserved = [];
-    for (const item of items.sort((a, b) => BigInt(a.id) < BigInt(b.id) ? -1 : 1)) {
-      const result = await client.query('UPDATE products SET stock = stock - $1 WHERE id = $2 AND stock >= $1 AND is_active = TRUE RETURNING id, name, price', [item.quantity, item.id]);
-      if (!result.rows.length) {
+    for (const item of items.sort((a, b) => BigInt(a.id) < BigInt(b.id) ? -1 : BigInt(a.id) > BigInt(b.id) ? 1 : BigInt(a.variantId ?? 0) < BigInt(b.variantId ?? 0) ? -1 : 1)) {
+      const productResult = await client.query('SELECT id, name, price, stock, has_variants FROM products WHERE id = $1 AND is_active = TRUE FOR UPDATE', [item.id]);
+      const product = productResult.rows[0];
+      if (!product || product.has_variants !== (item.variantId !== null) || product.stock < item.quantity) {
         await client.query('ROLLBACK');
         return NextResponse.json({ error: 'Salah satu produk sudah habis atau stoknya berubah. Periksa keranjang kembali.' }, { status: 409 });
       }
-      reserved.push({ ...result.rows[0], quantity: item.quantity });
+      let chosen = { id: product.id, name: product.name, price: product.price, quantity: item.quantity, variantId: null };
+      if (item.variantId !== null) {
+        const variantResult = await client.query(`UPDATE product_variants v SET stock = v.stock - $1
+          FROM variant_options c, variant_options s WHERE v.id = $2 AND v.product_id = $3 AND v.is_active = TRUE AND v.stock >= $1
+          AND c.id = v.color_id AND s.id = v.size_id
+          RETURNING v.id, v.price, c.name AS color, s.name AS size`, [item.quantity, item.variantId, item.id]);
+        if (!variantResult.rows.length) {
+          await client.query('ROLLBACK');
+          return NextResponse.json({ error: 'Varian yang dipilih sudah habis atau berubah. Periksa keranjang kembali.' }, { status: 409 });
+        }
+        const variant = variantResult.rows[0];
+        chosen = { ...chosen, name: `${product.name} (${variant.color} · ${variant.size})`, price: variant.price, variantId: variant.id };
+      }
+      await client.query('UPDATE products SET stock = stock - $1 WHERE id = $2', [item.quantity, item.id]);
+      reserved.push(chosen);
     }
     const subtotal = reserved.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const order = await client.query(`INSERT INTO orders (customer_name, email, phone, whatsapp_opt_in, address, city, postal_code, notes, subtotal, total)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$9) RETURNING id, total, created_at`, [customerName, email, whatsAppPhone, whatsappOptIn, address, city, postalCode, notes, subtotal]);
     for (const item of reserved) {
-      await client.query('INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, line_total) VALUES ($1,$2,$3,$4,$5,$6)', [order.rows[0].id, item.id, item.name, item.quantity, item.price, item.price * item.quantity]);
+      await client.query('INSERT INTO order_items (order_id, product_id, variant_id, product_name, quantity, unit_price, line_total) VALUES ($1,$2,$3,$4,$5,$6,$7)', [order.rows[0].id, item.id, item.variantId, item.name, item.quantity, item.price, item.price * item.quantity]);
     }
     await client.query('COMMIT');
     savedOrder = { id: order.rows[0].id, total: order.rows[0].total, createdAt: order.rows[0].created_at, customerName, email, phone: whatsAppPhone, whatsappOptIn, address, city, postalCode, notes, items: reserved };

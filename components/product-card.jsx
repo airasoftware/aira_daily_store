@@ -17,6 +17,7 @@ export function ProductCard({ product }) {
   useEffect(() => () => clearTimeout(feedbackTimer.current), []);
 
   function addOne(event) {
+    if (product.has_variants) { window.location.href = `/products/${product.slug}`; return; }
     const inCart = items.find(item => item.id === String(product.id))?.quantity || 0;
     if (inCart < product.stock) {
       add(product);
@@ -28,5 +29,5 @@ export function ProductCard({ product }) {
     feedbackTimer.current = setTimeout(() => setFeedback(''), 2200);
   }
 
-  return <article className="product-card"><Link href={`/products/${product.slug}`} className="product-photo"><img src={product.image_url} alt={product.name} loading="lazy" />{product.badge && <span className="product-badge">{product.badge}</span>}{percent > 0 && <span className="discount-badge">-{percent}%</span>}</Link><div className="product-info"><span className="category-label">{product.category}</span><Link href={`/products/${product.slug}`} className="product-name">{product.name}</Link><div className="prices">{product.compare_at_price && <s>{money(product.compare_at_price)}</s>}<strong>{money(product.price)}</strong></div><button className={`card-add cart-feedback-button ${feedback === 'added' ? 'is-added' : feedback === 'maxed' ? 'is-maxed' : ''}`} onClick={addOne} disabled={!ready || product.stock < 1} aria-live="polite">{product.stock < 1 ? 'Stok habis' : !ready ? 'Memuat keranjang...' : feedback === 'added' ? <><span className="cart-added-check" key={feedbackKey} aria-hidden="true">✓</span> Ditambahkan!</> : feedback === 'maxed' ? 'Stok maksimum di keranjang' : <><FigmaIcon name="cart-add" /> Keranjang</>}</button></div></article>;
+  return <article className="product-card"><Link href={`/products/${product.slug}`} className="product-photo"><img src={product.image_url} alt={product.name} loading="lazy" />{product.badge && <span className="product-badge">{product.badge}</span>}{percent > 0 && <span className="discount-badge">-{percent}%</span>}</Link><div className="product-info"><span className="category-label">{product.category}</span><Link href={`/products/${product.slug}`} className="product-name">{product.name}</Link><div className="prices">{product.compare_at_price && <s>{money(product.compare_at_price)}</s>}<strong>{money(product.price)}</strong></div><button className={`card-add cart-feedback-button ${feedback === 'added' ? 'is-added' : feedback === 'maxed' ? 'is-maxed' : ''}`} onClick={addOne} disabled={!ready || product.stock < 1} aria-live="polite">{product.stock < 1 ? 'Stok habis' : product.has_variants ? 'Pilih varian' : !ready ? 'Memuat keranjang...' : feedback === 'added' ? <><span className="cart-added-check" key={feedbackKey} aria-hidden="true">✓</span> Ditambahkan!</> : feedback === 'maxed' ? 'Stok maksimum di keranjang' : <><FigmaIcon name="cart-add" /> Keranjang</>}</button></div></article>;
 }

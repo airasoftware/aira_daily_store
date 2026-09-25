@@ -1,6 +1,6 @@
 # Memori Proyek Aira Daily Store
 
-**Terakhir diperbarui:** 24 September 2026
+**Terakhir diperbarui:** 25 September 2026
 **Status:** aplikasi dan panel admin selesai sebagai prototipe; skema dan data contoh ada di Supabase, beranda serta katalog sudah aktif di Vercel, tetapi checkout dan admin produksi belum diuji penuh.
 **Repo:** `/Users/yukiwicaksono/Devs/aira_daily_store`
 
@@ -16,6 +16,10 @@
 - Panduan setup ada di [README.md](README.md). Aset dari `/Users/yukiwicaksono/Devs/kaija-nextjs-asset` berupa starter kode; gambar produk saat ini memakai URL Unsplash remote.
 
 ## Bukti terakhir
+
+- Pada 25 September 2026, file SQL mandiri `db/20260925_product_variants_supabase.sql` dibuat untuk dijalankan melalui Supabase SQL Editor. Isinya hanya perubahan varian (kolom, tabel, izin SELECT publik, dan policy RLS), dibungkus transaksi dan aman dijalankan ulang. File ini berhasil dijalankan dua kali pada PostgreSQL lokal sementara dengan role `anon`/`authenticated`; server uji sudah dihentikan. Skema tujuan Supabase telah diperbarui melalui `npm run db:migrate` pada pekerjaan sebelumnya, sehingga pengguna tidak perlu menjalankan file ini untuk proyek Supabase yang sama, tetapi boleh menjalankannya ulang untuk verifikasi atau lingkungan lain. Pengguna meminta seluruh pekerjaan varian tidak di-commit sampai ada persetujuan.
+
+- Pada 25 September 2026, fitur varian produk ditambahkan: master warna/ukuran di `/admin/variants`, kombinasi harga jual dan stok di editor produk, pilihan kombinasi di detail, identitas varian di keranjang/checkout, harga serta stok varian diverifikasi ulang dalam transaksi server, dan pembatalan mengembalikan stok kombinasi yang benar. Produk lama tanpa varian tetap memakai alur semula. Skema menambah `variant_options`, `product_variants`, `products.has_variants`, dan `order_items.variant_id` secara kompatibel. Katalog publik hanya membaca kombinasi aktif dari produk aktif lewat RLS. `npm run build`, `npm run test:catalog` (3 tes), `npm run test:notifications` (7 tes), dan `git diff --check` lulus. Migrasi dijalankan dua kali pada PostgreSQL lokal sementara; uji transaksi memastikan harga dan nama kombinasi terbaca serta stok berkurang, dan uji pembatalan dua kombinasi mengembalikan total stok dari 0 ke 3. Database lokal sementara sudah dihentikan. `npm run db:migrate` pada database tujuan berhasil dan `db:check` mengonfirmasi kelima tabel tersedia; proses `db:check` kembali menggantung setelah hasil tampil dan dihentikan manual. Pembacaan anon Supabase atas kedua tabel varian berhasil. Deployment kode, uji CMS visual, dan checkout nyata belum dilakukan.
 
 - `npm run build` berhasil setelah persiapan Supabase.
 - Setelah pengaturan SSL, parser `pg-connection-string` membaca kedua URL dari `.env` dengan `sslmode=verify-full` tanpa warning; `npm run test:catalog` (3 tes) dan `npm run build` berhasil. Ini belum membuktikan koneksi ke Supabase.
@@ -71,6 +75,8 @@
 13. [ ] Periksa PDF invoice contoh secara visual di perangkat pengguna, lalu uji satu checkout nyata untuk memastikan subjek, isi, dan lampiran invoice memakai data pesanan tersimpan.
 14. [ ] Setelah deployment, periksa satu pesanan baru dan satu pesanan lama di admin untuk memastikan nomor `ORD-...` konsisten dengan email, WhatsApp, dan PDF; format template WhatsApp yang sudah disetujui di Meta mungkin masih menambah tanda `#` di depan nomor.
 15. [ ] Setelah deployment PWA, uji instalasi dari Chrome/Android dan Safari/iOS serta navigasi toko tanpa koneksi di perangkat; pastikan checkout kembali memakai data stok terbaru setelah tersambung.
+16. [x] Jalankan `npm run db:migrate` pada database tujuan sebelum deploy fitur varian.
+17. [ ] Setelah kode dirilis, uji tambah master warna/ukuran, kombinasi dengan harga berbeda, checkout, dan pembatalan stok pada lingkungan tujuan.
 
 ## Cara memantau progres
 

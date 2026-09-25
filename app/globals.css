@@ -125,3 +125,4 @@
 @media(prefers-reduced-motion:reduce){.cart-link.cart-arrival,.mobile-nav a[href="/cart"].cart-arrival{animation:none}}
 .header{position:sticky;top:0;z-index:30}
 @media(max-width:640px){.header{position:relative;top:auto;z-index:10}}
+.variant-picker{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}.variant-picker label{display:grid;gap:7px;min-width:145px;font-size:12px;font-weight:700}.variant-picker select{min-height:46px;padding:9px 12px;border:1px solid var(--line);background:#fff;color:var(--ink)}.cart-variant{display:block;color:var(--muted);margin:-4px 0 8px}.checkout-line em{font-style:normal;color:var(--muted);font-size:12px}
