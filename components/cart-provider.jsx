@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
+import { variantImage } from '../lib/variant-image';
 
 const CartContext = createContext(null);
 
@@ -24,7 +25,7 @@ export function CartProvider({ children }) {
       const existing = current.find(item => `${item.id}:${item.variantId ?? ''}` === key);
       if (existing) return current.map(item => `${item.id}:${item.variantId ?? ''}` === key ? { ...item, quantity: Math.min(item.stock, item.quantity + quantity) } : item);
       const stock = variant?.stock ?? product.stock;
-      return [...current, { id: String(product.id), variantId: variant ? String(variant.id) : null, color: variant?.color ?? null, size: variant?.size ?? null, slug: product.slug, name: product.name, price: variant?.price ?? product.price, image_url: variant?.image_url || product.image_url, stock, quantity: Math.min(stock, quantity) }];
+      return [...current, { id: String(product.id), variantId: variant ? String(variant.id) : null, color: variant?.color ?? null, size: variant?.size ?? null, slug: product.slug, name: product.name, price: variant?.price ?? product.price, image_url: variantImage(product, variant), stock, quantity: Math.min(stock, quantity) }];
     });
   }
 
