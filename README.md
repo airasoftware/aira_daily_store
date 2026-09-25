@@ -13,7 +13,7 @@ Toko perlengkapan outdoor anak dengan Next.js App Router dan PostgreSQL, terinsp
    Untuk menguji koneksi tanpa mengubah database, jalankan `npm run db:ping` (`DATABASE_URL`) atau `npm run db:ping -- --migration` (`MIGRATION_DATABASE_URL`). Perintah ini hanya menjalankan `SELECT 1`.
 5. Jalankan `npm run dev`, lalu buka `http://localhost:3000`. Tambahkan produk dari panel admin, atau jalankan `npm run db:seed` **hanya jika memang ingin** memasukkan 12 produk dan 3 pesanan demo (4 item pesanan). Seed aman diulang dan tidak menimpa produk atau pesanan yang sudah ada. Pesanan demo ditandai jelas sebagai data contoh; pesanan `pending` dan `paid` mengurangi stok, sedangkan pesanan `cancelled` tidak.
 
-Isi keempat variabel sebelum menjalankan build produksi; Next.js memasukkan nilai `NEXT_PUBLIC_` ke bundle saat build. Setelah mengubah nilai tersebut, jalankan `npm run build` lagi sebelum `npm run start` atau deployment.
+Isi keempat variabel koneksi sebelum menjalankan build produksi, serta `SUPABASE_SECRET_KEY` jika ingin memakai upload gambar CMS. Next.js memasukkan nilai `NEXT_PUBLIC_` ke bundle saat build. Setelah mengubah nilai tersebut, jalankan `npm run build` lagi sebelum `npm run start` atau deployment.
 
 Contoh bentuk URL (salin host dan username yang sebenarnya dari dashboard):
 
@@ -22,6 +22,7 @@ DATABASE_URL=postgresql://postgres.PROJECT_REF:PASSWORD@POOLER_HOST:6543/postgre
 MIGRATION_DATABASE_URL=postgresql://postgres.PROJECT_REF:PASSWORD@POOLER_HOST:5432/postgres?sslmode=verify-full
 NEXT_PUBLIC_SUPABASE_URL=https://PROJECT_REF.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+SUPABASE_SECRET_KEY=sb_secret_...
 ```
 
 Saat kedua variabel `NEXT_PUBLIC_` terisi, beranda, katalog, dan detail produk membaca tabel `products` melalui Supabase JS/Data API. Migrasi memberi role `anon` dan `authenticated` izin **SELECT produk aktif saja**; tabel pesanan tidak diberi izin Data API. Jika kedua variabel masih kosong, katalog memakai koneksi PostgreSQL server seperti sebelumnya untuk pengembangan lokal. Jika hanya satu variabel terisi, aplikasi menampilkan kesalahan konfigurasi.
@@ -62,7 +63,11 @@ Variabel lama `GMAIL_APP_PASSWORD`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS
 
 Admin dapat menambah dan mengedit produk, mengatur stok, memilih produk untuk Best Seller atau New Arrival, serta mengarsipkan produk. Produk yang diarsipkan tersembunyi dari toko tetapi riwayat pesanan tetap tersimpan. Admin dapat menandai pesanan menunggu sebagai dibayar atau membatalkannya. Pembatalan mengembalikan stok; pesanan yang sudah dibayar tidak dapat dibatalkan melalui panel ini. Halaman **Pengaturan** mengelola pengirim notifikasi checkout.
 
+Alamat produk dibuat otomatis dari nama saat produk baru disimpan. Nama yang sama mendapat akhiran angka agar alamat tetap unik. Mengubah nama produk tidak mengubah alamat yang sudah ada.
+
 Untuk produk dengan varian, tambahkan pilihan warna dan ukuran di **Master varian** (`/admin/variants`). Di editor produk, aktifkan pilihan varian lalu isi kombinasi warna–ukuran, harga jual, dan stok tiap kombinasi. Katalog menampilkan harga kombinasi termurah dan jumlah stok aktif; pelanggan memilih kombinasi di halaman detail. Harga dan stok selalu diperiksa kembali di server saat checkout. Jalankan `npm run db:migrate` pada database tujuan sebelum menjalankan versi aplikasi ini.
+
+Editor produk menerima upload gambar utama dan gambar opsional untuk tiap kombinasi warna–ukuran. Gambar kombinasi ditampilkan saat pelanggan memilih kombinasi tersebut; jika kosong, gambar utama tetap dipakai. Upload menerima JPG, PNG, atau WebP maksimal 4 MB. Isi `SUPABASE_SECRET_KEY` dari Supabase Connect pada environment **server** (tanpa prefix `NEXT_PUBLIC_`). Saat upload pertama, aplikasi membuat bucket Storage publik `product-images` dengan pembatasan tipe dan ukuran file. Jalankan `npm run db:migrate` atau [`db/20260925_product_variant_images_supabase.sql`](db/20260925_product_variant_images_supabase.sql) untuk menambah kolom gambar varian. URL gambar lama tetap dapat dipakai.
 
 Jika migrasi dilakukan melalui Supabase SQL Editor, gunakan [`db/20260925_product_variants_supabase.sql`](db/20260925_product_variants_supabase.sql). Skrip ini khusus perubahan varian dan aman dijalankan ulang pada skema Aira Daily Store yang sudah memiliki tabel `products` serta `order_items`.
 

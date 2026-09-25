@@ -21,8 +21,8 @@ export async function PUT(request, { params }) {
   const client = await getPool().connect();
   try {
     await client.query('BEGIN');
-    const result = await client.query(`UPDATE products SET slug=$1, name=$2, description=$3, category=$4, price=$5, compare_at_price=$6, image_url=$7, badge=$8, stock=$9, is_featured=$10, is_new=$11, is_active=$12, has_variants=FALSE
-      WHERE id=$13 RETURNING id`, [p.slug, p.name, p.description, p.category, p.price, p.compareAtPrice, p.imageUrl, p.badge, p.stock, p.featured, p.newest, p.active, id]);
+    const result = await client.query(`UPDATE products SET name=$1, description=$2, category=$3, price=$4, compare_at_price=$5, image_url=$6, badge=$7, stock=$8, is_featured=$9, is_new=$10, is_active=$11, has_variants=FALSE
+      WHERE id=$12 RETURNING id`, [p.name, p.description, p.category, p.price, p.compareAtPrice, p.imageUrl, p.badge, p.stock, p.featured, p.newest, p.active, id]);
     if (!result.rows.length) { await client.query('ROLLBACK'); return NextResponse.json({ error: 'Produk tidak ditemukan.' }, { status: 404 }); }
     await saveProductVariants(client, id, p.variants);
     await client.query('COMMIT');
@@ -30,7 +30,6 @@ export async function PUT(request, { params }) {
   } catch (error) {
     await client.query('ROLLBACK');
     if (error.message === 'INVALID_VARIANTS') return NextResponse.json({ error: 'Pilihan warna atau ukuran tidak valid.' }, { status: 400 });
-    if (error.code === '23505') return NextResponse.json({ error: 'Slug sudah dipakai produk lain.' }, { status: 409 });
     console.error('Gagal memperbarui produk:', error);
     return NextResponse.json({ error: 'Produk belum dapat diperbarui.' }, { status: 500 });
   } finally { client.release(); }

@@ -31,10 +31,12 @@ CREATE TABLE IF NOT EXISTS product_variants (
   color_id BIGINT NOT NULL REFERENCES variant_options(id),
   size_id BIGINT NOT NULL REFERENCES variant_options(id),
   price INTEGER NOT NULL CHECK (price >= 0),
+  image_url TEXT,
   stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   UNIQUE (product_id, color_id, size_id)
 );
+ALTER TABLE product_variants ADD COLUMN IF NOT EXISTS image_url TEXT;
 
 CREATE TABLE IF NOT EXISTS orders (
   id BIGSERIAL PRIMARY KEY,
