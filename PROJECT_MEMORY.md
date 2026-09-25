@@ -17,6 +17,8 @@
 
 ## Bukti terakhir
 
+- Pada 25 September 2026, ikon menu **Pengaturan** di sidebar admin diganti dari bintang menjadi gear SVG asli dari Figma Community “Gear Setting Icon” oleh Design Space (CC BY 4.0); atribusi sumber tercantum di `public/icons/gear.svg`. Aset dipotong ke bidang 24 px dan warnanya disesuaikan dengan ikon sidebar lain. Tampilan admin lokal diperiksa secara visual, `npm run build` dan `git diff --check` lulus. Pengguna menyetujui commit dan push perubahan ini.
+
 - Pada 25 September 2026, pekerjaan upload gambar varian dan slug otomatis disimpan pada commit `bab2dea`. Sesudahnya, deskripsi produk diganti menjadi editor WYSIWYG berbasis Tiptap (bukan TinyMCE) dengan toolbar paragraf/judul/subjudul, tebal, miring, garis bawah, coret, daftar, kutipan, perataan, tautan, undo/redo, dan penghitung kata. Server membatasi HTML, URL tautan, dan gaya perataan sebelum simpan/tampil; deskripsi lama berbentuk teks biasa tetap ditampilkan sebagai paragraf. Uji sanitasi tautan aman/berbahaya, perataan, teks lama, `npm run build`, dan `git diff --check` lulus. Pengguna menyetujui commit dan push kedua pekerjaan ini. Langkah berikutnya: uji visual editor dan upload gambar dengan sesi admin setelah konfigurasi Storage siap.
 
 - Pada 25 September 2026, atas koreksi pengguna, kartu gambar utama tetap di sidebar dengan input upload dan URL bertumpuk seperti semula. Setiap kombinasi varian kini memiliki kartu sendiri; tombol tambah kombinasi langsung membuat kartu baru. Di dalam kartu varian, input upload dan URL gambar berdampingan pada layar lebar dan bertumpuk pada layar kecil. `npm run build` dan `git diff --check` lulus. Perubahan belum dideploy.
