@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS products (
   price INTEGER NOT NULL CHECK (price >= 0),
   compare_at_price INTEGER CHECK (compare_at_price >= price),
   image_url TEXT NOT NULL,
+  gallery_urls TEXT[] NOT NULL DEFAULT '{}',
   badge TEXT,
   stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,
@@ -17,6 +18,7 @@ CREATE TABLE IF NOT EXISTS products (
 
 ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS has_variants BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS gallery_urls TEXT[] NOT NULL DEFAULT '{}';
 
 CREATE TABLE IF NOT EXISTS variant_options (
   id BIGSERIAL PRIMARY KEY,
@@ -28,15 +30,24 @@ CREATE TABLE IF NOT EXISTS variant_options (
 CREATE TABLE IF NOT EXISTS product_variants (
   id BIGSERIAL PRIMARY KEY,
   product_id BIGINT NOT NULL REFERENCES products(id),
-  color_id BIGINT NOT NULL REFERENCES variant_options(id),
-  size_id BIGINT NOT NULL REFERENCES variant_options(id),
+  color_id BIGINT REFERENCES variant_options(id),
+  size_id BIGINT REFERENCES variant_options(id),
   price INTEGER NOT NULL CHECK (price >= 0),
   image_url TEXT,
   stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
-  UNIQUE (product_id, color_id, size_id)
+  CONSTRAINT product_variants_has_option CHECK (color_id IS NOT NULL OR size_id IS NOT NULL)
 );
 ALTER TABLE product_variants ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE product_variants ALTER COLUMN color_id DROP NOT NULL;
+ALTER TABLE product_variants ALTER COLUMN size_id DROP NOT NULL;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'product_variants_has_option') THEN
+    ALTER TABLE product_variants ADD CONSTRAINT product_variants_has_option CHECK (color_id IS NOT NULL OR size_id IS NOT NULL);
+  END IF;
+END $$;
+CREATE UNIQUE INDEX IF NOT EXISTS product_variants_option_pair_unique
+  ON product_variants (product_id, COALESCE(color_id, 0), COALESCE(size_id, 0));
 
 CREATE TABLE IF NOT EXISTS orders (
   id BIGSERIAL PRIMARY KEY,

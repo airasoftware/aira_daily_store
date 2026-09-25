@@ -48,15 +48,17 @@ export async function POST(request) {
       let chosen = { id: product.id, name: product.name, price: product.price, quantity: item.quantity, variantId: null };
       if (item.variantId !== null) {
         const variantResult = await client.query(`UPDATE product_variants v SET stock = v.stock - $1
-          FROM variant_options c, variant_options s WHERE v.id = $2 AND v.product_id = $3 AND v.is_active = TRUE AND v.stock >= $1
-          AND c.id = v.color_id AND s.id = v.size_id
+          FROM product_variants matched
+          LEFT JOIN variant_options c ON c.id = matched.color_id
+          LEFT JOIN variant_options s ON s.id = matched.size_id
+          WHERE matched.id = v.id AND v.id = $2 AND v.product_id = $3 AND v.is_active = TRUE AND v.stock >= $1
           RETURNING v.id, v.price, c.name AS color, s.name AS size`, [item.quantity, item.variantId, item.id]);
         if (!variantResult.rows.length) {
           await client.query('ROLLBACK');
           return NextResponse.json({ error: 'Varian yang dipilih sudah habis atau berubah. Periksa keranjang kembali.' }, { status: 409 });
         }
         const variant = variantResult.rows[0];
-        chosen = { ...chosen, name: `${product.name} (${variant.color} · ${variant.size})`, price: variant.price, variantId: variant.id };
+        chosen = { ...chosen, name: `${product.name} (${[variant.color, variant.size].filter(Boolean).join(' · ')})`, price: variant.price, variantId: variant.id };
       }
       await client.query('UPDATE products SET stock = stock - $1 WHERE id = $2', [item.quantity, item.id]);
       reserved.push(chosen);

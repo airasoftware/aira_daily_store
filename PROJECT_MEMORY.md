@@ -17,6 +17,8 @@
 
 ## Bukti terakhir
 
+- Pada 25 September 2026, editor produk menerima varian dengan minimal satu opsi warna atau ukuran; pilihan kosong tetap bermakna tanpa warna atau all size. Validasi server, skema, penyimpanan varian, katalog/detail, dan nama item checkout disesuaikan. Produk kini dapat menyimpan maksimal tiga URL gambar pendamping opsional melalui upload yang sudah ada dan menampilkannya sebagai galeri thumbnail di detail. Migrasi aman diulang tersedia di `db/20260925_optional_variants_gallery_supabase.sql`. `npm run db:migrate` berhasil pada database Supabase tujuan; query terpisah mengonfirmasi kolom `gallery_urls`, `color_id`/`size_id` nullable, dan indeks unik pasangan opsi tersedia. Proses query verifikasi menggantung setelah hasil tampil saat penutupan koneksi pooler, lalu dihentikan. Kode belum dideploy. `npm run build`, `npm run test:catalog` (3 tes), dan `git diff --check` lulus. PostgreSQL lokal sementara membuktikan validasi minimal satu opsi, batas tiga gambar, simpan/baca/simpan ulang varian warna saja dan ukuran saja, total stok, migrasi SQL, serta kueri checkout warna saja. Server uji sudah dihentikan. Langkah berikutnya: deploy kode setelah disetujui, lalu uji form admin dan galeri dengan gambar asli.
+
 - Pada 25 September 2026, ikon menu **Pengaturan** di sidebar admin diganti dari bintang menjadi gear SVG asli dari Figma Community “Gear Setting Icon” oleh Design Space (CC BY 4.0); atribusi sumber tercantum di `public/icons/gear.svg`. Aset dipotong ke bidang 24 px dan warnanya disesuaikan dengan ikon sidebar lain. Tampilan admin lokal diperiksa secara visual, `npm run build` dan `git diff --check` lulus. Pengguna menyetujui commit dan push perubahan ini.
 
 - Pada 25 September 2026, pekerjaan upload gambar varian dan slug otomatis disimpan pada commit `bab2dea`. Sesudahnya, deskripsi produk diganti menjadi editor WYSIWYG berbasis Tiptap (bukan TinyMCE) dengan toolbar paragraf/judul/subjudul, tebal, miring, garis bawah, coret, daftar, kutipan, perataan, tautan, undo/redo, dan penghitung kata. Server membatasi HTML, URL tautan, dan gaya perataan sebelum simpan/tampil; deskripsi lama berbentuk teks biasa tetap ditampilkan sebagai paragraf. Uji sanitasi tautan aman/berbahaya, perataan, teks lama, `npm run build`, dan `git diff --check` lulus. Pengguna menyetujui commit dan push kedua pekerjaan ini. Langkah berikutnya: uji visual editor dan upload gambar dengan sesi admin setelah konfigurasi Storage siap.
@@ -88,6 +90,8 @@
 16. [x] Jalankan `npm run db:migrate` pada database tujuan sebelum deploy fitur varian.
 17. [ ] Setelah kode dirilis, uji tambah master warna/ukuran, kombinasi dengan harga berbeda, checkout, dan pembatalan stok pada lingkungan tujuan.
 18. [ ] Isi `SUPABASE_SECRET_KEY` di environment server lokal dan deployment, lalu uji unggah gambar utama dan varian lewat CMS, pergantian foto di detail, serta gambar varian di keranjang. Jangan letakkan kunci pada variabel `NEXT_PUBLIC_`.
+19. [x] Migrasikan skema varian opsional dan galeri pada database tujuan; query terpisah memastikan hasilnya.
+20. [ ] Setelah kode dideploy, uji produk dengan varian warna saja, ukuran saja, dan maksimal tiga gambar pendamping di CMS serta detail produk.
 
 ## Cara memantau progres
 
