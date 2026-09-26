@@ -21,9 +21,9 @@ export async function POST(request) {
     const baseSlug = slugFromName(p.name);
     let result;
     for (let number = 1; number <= 1000; number++) {
-      result = await client.query(`INSERT INTO products (slug, name, description, category, price, compare_at_price, image_url, gallery_urls, badge, stock, is_featured, is_new, is_active)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (slug) DO NOTHING RETURNING id`,
-      [numberedSlug(baseSlug, number), p.name, p.description, p.category, p.price, p.compareAtPrice, p.imageUrl, p.galleryUrls, p.badge, p.stock, p.featured, p.newest, p.active]);
+      result = await client.query(`INSERT INTO products (slug, name, description, category, price, cost_price, compare_at_price, image_url, gallery_urls, badge, stock, is_featured, is_new, is_active)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) ON CONFLICT (slug) DO NOTHING RETURNING id`,
+      [numberedSlug(baseSlug, number), p.name, p.description, p.category, p.price, p.costPrice, p.compareAtPrice, p.imageUrl, p.galleryUrls, p.badge, p.stock, p.featured, p.newest, p.active]);
       if (result.rows.length) break;
     }
     if (!result?.rows.length) throw new Error('SLUG_UNAVAILABLE');

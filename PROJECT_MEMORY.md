@@ -1,6 +1,6 @@
 # Memori Proyek Aira Daily Store
 
-**Terakhir diperbarui:** 25 September 2026
+**Terakhir diperbarui:** 26 September 2026
 **Status:** aplikasi dan panel admin selesai sebagai prototipe; skema dan data contoh ada di Supabase, beranda serta katalog sudah aktif di Vercel, tetapi checkout dan admin produksi belum diuji penuh.
 **Repo:** `/Users/yukiwicaksono/Devs/aira_daily_store`
 
@@ -100,6 +100,8 @@
 18. [ ] Isi `SUPABASE_SECRET_KEY` di environment server lokal dan deployment, lalu uji unggah gambar utama dan varian lewat CMS, pergantian foto di detail, serta gambar varian di keranjang. Jangan letakkan kunci pada variabel `NEXT_PUBLIC_`.
 19. [x] Migrasikan skema varian opsional dan galeri pada database tujuan; query terpisah memastikan hasilnya.
 20. [ ] Setelah kode dideploy, uji produk dengan varian warna saja, ukuran saja, dan maksimal tiga gambar pendamping di CMS serta detail produk.
+21. [ ] Setelah kode dideploy, buka modul Keuangan dengan sesi admin; uji satu jurnal manual dan satu pesanan dibayar, lalu cocokkan jurnal umum, buku besar, neraca saldo, laba rugi, dan neraca.
+22. [ ] Isi harga modal seluruh produk/varian asli sebelum menerima pesanan baru. Buat jurnal saldo awal untuk persediaan, kas, utang, dan modal; pesanan lama tidak memiliki snapshot HPP sehingga koreksinya perlu jurnal penyesuaian manual.
 
 ## Cara memantau progres
 

@@ -14,6 +14,7 @@
     "db:ping": "node --env-file=.env scripts/ping-db.mjs",
     "test:catalog": "node --test tests/supabase-catalog.test.mjs",
     "test:notifications": "node --test tests/order-notifications.test.mjs",
+    "test:finance": "node --test tests/finance.test.mjs",
     "admin:hash": "node scripts/hash-admin-password.mjs"
   },
   "dependencies": {

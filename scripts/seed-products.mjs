@@ -1,5 +1,6 @@
 import pg from 'pg';
 import { getDatabaseConfig } from '../lib/db-config.js';
+import { postOrderPayment } from '../lib/accounting.js';
 
 const products = [
   ['silas-kids-vest', 'Silas Kids Vest', 'Vest anak ringan yang nyaman dipakai untuk aktivitas sehari-hari.', 'Baju Anak', 203670, 302100, 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&w=900&q=85', 'TERBARU', 18, true, false],
@@ -81,8 +82,8 @@ try {
 
     const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const order = await client.query(`INSERT INTO orders
-      (customer_name, email, phone, address, city, postal_code, notes, subtotal, shipping_fee, total, status)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
+      (customer_name, email, phone, address, city, postal_code, notes, subtotal, shipping_fee, total, status, paid_at)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,CASE WHEN $11 = 'paid' THEN NOW() ELSE NULL END) RETURNING id`,
       [demo.customer, demo.email, '0000000000', 'Alamat contoh, jangan kirim', 'Jakarta', '00000', notes,
         subtotal, demo.shippingFee, subtotal + demo.shippingFee, demo.status]
     );
@@ -94,6 +95,7 @@ try {
       );
       insertedItems += 1;
     }
+    if (demo.status === 'paid') await postOrderPayment(client, order.rows[0].id);
     insertedOrders += 1;
   }
   await client.query('COMMIT');

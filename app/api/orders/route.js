@@ -39,26 +39,26 @@ export async function POST(request) {
     await client.query('BEGIN');
     const reserved = [];
     for (const item of items.sort((a, b) => BigInt(a.id) < BigInt(b.id) ? -1 : BigInt(a.id) > BigInt(b.id) ? 1 : BigInt(a.variantId ?? 0) < BigInt(b.variantId ?? 0) ? -1 : 1)) {
-      const productResult = await client.query('SELECT id, name, price, stock, has_variants FROM products WHERE id = $1 AND is_active = TRUE FOR UPDATE', [item.id]);
+      const productResult = await client.query('SELECT id, name, price, cost_price, stock, has_variants FROM products WHERE id = $1 AND is_active = TRUE FOR UPDATE', [item.id]);
       const product = productResult.rows[0];
       if (!product || product.has_variants !== (item.variantId !== null) || product.stock < item.quantity) {
         await client.query('ROLLBACK');
         return NextResponse.json({ error: 'Salah satu produk sudah habis atau stoknya berubah. Periksa keranjang kembali.' }, { status: 409 });
       }
-      let chosen = { id: product.id, name: product.name, price: product.price, quantity: item.quantity, variantId: null };
+      let chosen = { id: product.id, name: product.name, price: product.price, cost: product.cost_price, quantity: item.quantity, variantId: null };
       if (item.variantId !== null) {
         const variantResult = await client.query(`UPDATE product_variants v SET stock = v.stock - $1
           FROM product_variants matched
           LEFT JOIN variant_options c ON c.id = matched.color_id
           LEFT JOIN variant_options s ON s.id = matched.size_id
           WHERE matched.id = v.id AND v.id = $2 AND v.product_id = $3 AND v.is_active = TRUE AND v.stock >= $1
-          RETURNING v.id, v.price, c.name AS color, s.name AS size`, [item.quantity, item.variantId, item.id]);
+          RETURNING v.id, v.price, v.cost_price, c.name AS color, s.name AS size`, [item.quantity, item.variantId, item.id]);
         if (!variantResult.rows.length) {
           await client.query('ROLLBACK');
           return NextResponse.json({ error: 'Varian yang dipilih sudah habis atau berubah. Periksa keranjang kembali.' }, { status: 409 });
         }
         const variant = variantResult.rows[0];
-        chosen = { ...chosen, name: `${product.name} (${[variant.color, variant.size].filter(Boolean).join(' · ')})`, price: variant.price, variantId: variant.id };
+        chosen = { ...chosen, name: `${product.name} (${[variant.color, variant.size].filter(Boolean).join(' · ')})`, price: variant.price, cost: variant.cost_price, variantId: variant.id };
       }
       await client.query('UPDATE products SET stock = stock - $1 WHERE id = $2', [item.quantity, item.id]);
       reserved.push(chosen);
@@ -67,7 +67,7 @@ export async function POST(request) {
     const order = await client.query(`INSERT INTO orders (customer_name, email, phone, whatsapp_opt_in, address, city, postal_code, notes, subtotal, total)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$9) RETURNING id, total, created_at`, [customerName, email, whatsAppPhone, whatsappOptIn, address, city, postalCode, notes, subtotal]);
     for (const item of reserved) {
-      await client.query('INSERT INTO order_items (order_id, product_id, variant_id, product_name, quantity, unit_price, line_total) VALUES ($1,$2,$3,$4,$5,$6,$7)', [order.rows[0].id, item.id, item.variantId, item.name, item.quantity, item.price, item.price * item.quantity]);
+      await client.query('INSERT INTO order_items (order_id, product_id, variant_id, product_name, quantity, unit_price, unit_cost, line_total) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)', [order.rows[0].id, item.id, item.variantId, item.name, item.quantity, item.price, item.cost, item.price * item.quantity]);
     }
     await client.query('COMMIT');
     savedOrder = { id: order.rows[0].id, total: order.rows[0].total, createdAt: order.rows[0].created_at, customerName, email, phone: whatsAppPhone, whatsappOptIn, address, city, postalCode, notes, items: reserved };

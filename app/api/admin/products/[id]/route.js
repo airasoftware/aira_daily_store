@@ -21,8 +21,8 @@ export async function PUT(request, { params }) {
   const client = await getPool().connect();
   try {
     await client.query('BEGIN');
-    const result = await client.query(`UPDATE products SET name=$1, description=$2, category=$3, price=$4, compare_at_price=$5, image_url=$6, gallery_urls=$7, badge=$8, stock=$9, is_featured=$10, is_new=$11, is_active=$12, has_variants=FALSE
-      WHERE id=$13 RETURNING id`, [p.name, p.description, p.category, p.price, p.compareAtPrice, p.imageUrl, p.galleryUrls, p.badge, p.stock, p.featured, p.newest, p.active, id]);
+    const result = await client.query(`UPDATE products SET name=$1, description=$2, category=$3, price=$4, cost_price=$5, compare_at_price=$6, image_url=$7, gallery_urls=$8, badge=$9, stock=$10, is_featured=$11, is_new=$12, is_active=$13, has_variants=FALSE
+      WHERE id=$14 RETURNING id`, [p.name, p.description, p.category, p.price, p.costPrice, p.compareAtPrice, p.imageUrl, p.galleryUrls, p.badge, p.stock, p.featured, p.newest, p.active, id]);
     if (!result.rows.length) { await client.query('ROLLBACK'); return NextResponse.json({ error: 'Produk tidak ditemukan.' }, { status: 404 }); }
     await saveProductVariants(client, id, p.variants);
     await client.query('COMMIT');

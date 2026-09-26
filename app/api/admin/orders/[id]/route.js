@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isAdmin, sameOrigin } from '../../../../../lib/admin-auth';
 import { getPool } from '../../../../../lib/db';
+import { postOrderPayment } from '../../../../../lib/accounting';
 
 export const runtime = 'nodejs';
 
@@ -19,7 +20,10 @@ export async function PATCH(request, { params }) {
     const order = await client.query('SELECT status FROM orders WHERE id=$1 FOR UPDATE', [id]);
     if (!order.rows.length) { await client.query('ROLLBACK'); return NextResponse.json({ error: 'Pesanan tidak ditemukan.' }, { status: 404 }); }
     if (order.rows[0].status !== 'pending') { await client.query('ROLLBACK'); return NextResponse.json({ error: 'Hanya pesanan menunggu yang dapat diubah.' }, { status: 409 }); }
-    await client.query('UPDATE orders SET status=$1 WHERE id=$2', [body.status, id]);
+    await client.query(`UPDATE orders
+      SET status=$1, paid_at=CASE WHEN $1 = 'paid' THEN NOW() ELSE paid_at END
+      WHERE id=$2`, [body.status, id]);
+    if (body.status === 'paid') await postOrderPayment(client, id);
     if (body.status === 'cancelled') {
       await client.query(`UPDATE product_variants v SET stock = v.stock + oi.quantity FROM order_items oi WHERE oi.order_id=$1 AND oi.variant_id=v.id`, [id]);
       await client.query(`UPDATE products p SET stock = p.stock + restored.quantity FROM
